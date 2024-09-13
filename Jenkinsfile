@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/helloworld-python.git'
+                git branch: 'main', url: 'https://github.com/ahmeddkhannn/reviewpipeline.git'
             }
         }
 
