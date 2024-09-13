@@ -23,7 +23,7 @@ pipeline {
                 script {
                     echo 'Building...'
                     // Use 'sh' for Unix-based agents
-                    sh 'echo "Building the Python app"'
+                    bat 'echo "Building the Python app"'
                 }
             }
         }
@@ -33,7 +33,7 @@ pipeline {
                 script {
                     echo 'Dockerizing...'
                     // Use 'sh' for Unix-based agents
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                    bat 'docker build -t $DOCKER_IMAGE .'
                 }
             }
         }
