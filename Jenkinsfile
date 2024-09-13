@@ -1,30 +1,29 @@
 pipeline {
     agent any
-    
+
     environment {
-        SONARQUBE = 'SonarQube'
+        GIT_CREDENTIALS_ID = 'github-credentials'
+        SONARQUBE_SERVER = 'SonarQube'
+        SONARQUBE_TOKEN = credentials('sonarqube-token')
         DOCKER_IMAGE = 'helloworld-python:latest'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/ahmeddkhannn/reviewpipeline.git'
+                script {
+                    echo 'Cloning repository...'
+                    git branch: 'main', url: 'https://github.com/ahmeddkhannn/reviewpipeline.git', credentialsId: env.GIT_CREDENTIALS_ID
+                }
             }
         }
 
         stage('Build') {
             steps {
                 script {
+                    echo 'Building...'
+                    // Use 'sh' for Unix-based agents
                     sh 'echo "Building the Python app"'
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    sh 'sonar-scanner'
                 }
             }
         }
@@ -32,7 +31,30 @@ pipeline {
         stage('Dockerize') {
             steps {
                 script {
+                    echo 'Dockerizing...'
+                    // Use 'sh' for Unix-based agents
                     sh 'docker build -t $DOCKER_IMAGE .'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo 'Running SonarQube analysis...'
+                    withSonarQubeEnv(env.SONARQUBE_SERVER) {
+                        // Use 'sh' for Unix-based agents
+                        sh 'sonar-scanner -Dsonar.projectKey=my-project-key -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo 'Deployment stage. Add deployment steps here if needed.'
+                    // This stage can be customized for your deployment needs
                 }
             }
         }
@@ -40,8 +62,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/app.py', allowEmptyArchive: true
-            junit '**/target/test-*.xml'
+            echo 'Pipeline completed.'
         }
     }
 }
